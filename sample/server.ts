@@ -31,8 +31,8 @@ server.get("/file", (req, res) => {
     width: 300,
     bg: "00FF00",
     color: "CC0000",
-    frames: 60,
-    fontSize: 48,
+    frames: 20,
+    fontSize: 20,
   };
 
   const tmpDir = process.cwd() + "/tmp/";
@@ -59,11 +59,11 @@ server.get("/stream", (req, res) => {
     width: 300,
     bg: "000000",
     color: "CC0000",
-    frames: 60,
-    fontSize: 36,
+    frames: 20,
+    fontSize: 20,
     fontFamily: "Mono",
   };
-  console.log(req);
+
   new Generator(options)
     .setTimer(req.query.time || new Date(), req.query.timezone || "UTC")
     .setOutputStream(res)

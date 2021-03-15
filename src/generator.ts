@@ -1,7 +1,10 @@
 import GIFEncoder from "gifencoder";
-import { CanvasRenderingContext2D, createCanvas } from "canvas";
+import { CanvasRenderingContext2D, createCanvas, loadImage } from "canvas";
+
 import moment from "moment-timezone";
 import { Stream } from "stream";
+
+const myimg = loadImage("./src/bg.png");
 
 export type ImageOptions = {
   width?: number;
@@ -22,6 +25,7 @@ export class Generator {
   private readonly encoder;
   private readonly ctx;
   private readonly options;
+  private image;
 
   private readonly defaultOptions: ImageOptions = {
     width: 200,
@@ -38,13 +42,25 @@ export class Generator {
 
   constructor(options?: ImageOptions) {
     this.options = { ...this.defaultOptions, ...options };
-    this.encoder = new GIFEncoder(this.options.width, this.options.height);
+    this.image = null;
+    myimg
+      .then((i) => {
+        this.image = i;
+        console.log("yey!");
+      })
+      .catch((err) => {
+        console.log("oh no!", err);
+      });
+
+    this.encoder = new GIFEncoder("600", "507");
     this.ctx = this.createContext();
   }
 
   createContext(): CanvasRenderingContext2D {
-    const canvas = createCanvas(this.options.width, this.options.height);
+    const canvas = createCanvas(600, 507);
+
     const ctx = canvas.getContext("2d");
+
     ctx.font = `${this.options.fontStyle} ${this.options.fontSize}px ${this.options.fontFamily}`.trim();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -52,6 +68,7 @@ export class Generator {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 10;
+
     return ctx;
   }
 
@@ -153,14 +170,14 @@ export class Generator {
         ? this.options.expired
         : "";
 
-      this.ctx.fillStyle = "#" + this.options.bg;
-      this.ctx.fillRect(0, 0, this.options.width, this.options.height);
+      if (this.image != null) {
+        this.ctx.drawImage(this.image, 0, 0, 600, 507);
+      } else {
+        this.image = await loadImage("./src/bg.png");
+        this.ctx.drawImage(this.image, 0, 0, 600, 507);
+      }
       this.ctx.fillStyle = "#" + this.options.color;
-      this.ctx.fillText(
-        timeStr,
-        this.options.width / 2,
-        this.options.height / 2
-      );
+      this.ctx.fillText(timeStr, 100, 380);
       this.encoder.addFrame(this.ctx);
 
       // remove a second for the next loop
